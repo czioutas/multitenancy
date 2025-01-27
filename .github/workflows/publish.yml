@@ -41,7 +41,7 @@ jobs:
 
     - name: Pack
       if: success() 
-      run: dotnet pack src/Multitenancy/Multitenancy.csproj --no-build --configuration Release -p:PackageVersion=${{ steps.gitversion.outputs.semVer }} -o ./artifacts
+      run: dotnet pack --no-build --configuration Release -p:PackageVersion=${{ steps.gitversion.outputs.semVer }} -o ./artifacts
 
     - name: Push to NuGet
       if: success()
