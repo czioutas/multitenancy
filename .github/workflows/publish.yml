@@ -21,7 +21,7 @@ jobs:
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.10.2
       with:
-        preferLatest: true
+        versionSpec: '5.x'
 
     - name: Determine Version
       id: gitversion
@@ -37,7 +37,7 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Test
-      run: dotnet test --configuration Release --verbosity normal
+      run: dotnet test --no-build --configuration Release --verbosity normal
 
     - name: Pack
       if: success() 
