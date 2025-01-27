@@ -19,7 +19,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     
     <!-- Repository Information -->
-    <RepositoryUrl>https://github.com/yourusername/multitenancy</RepositoryUrl>
+    <RepositoryUrl>https://github.com/czioutas/multitenancy</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     
     <!-- README and Documentation -->

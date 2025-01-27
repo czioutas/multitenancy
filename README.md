@@ -1,5 +1,7 @@
 # Czioutas.Multitenancy
 
+[![Test and Publish](https://github.com/czioutas/multitenancy/actions/workflows/publish.yml/badge.svg)](https://github.com/czioutas/multitenancy/actions/workflows/publish.yml)
+
 A lightweight, flexible multi-tenancy library for .NET applications that makes it easy to add tenant isolation to your ASP.NET Core APIs using Entity Framework Core.
 
 ## Features
