@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+    
+    <!-- Glossy effect -->
+    <linearGradient id="glass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0.05"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base background with gradient -->
+  <rect width="128" height="128" fill="url(#bg-gradient)" rx="16"/>
+  
+  <!-- Abstract tenant representation -->
+  <g transform="translate(64, 64)">
+    <!-- Rotating hexagons representing different tenants -->
+    <g transform="rotate(0)">
+      <path d="M0,-40 L34.64,-20 L34.64,20 L0,40 L-34.64,20 L-34.64,-20 Z" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="4"
+            opacity="0.9"/>
+    </g>
+    <g transform="rotate(30)">
+      <path d="M0,-32 L27.71,-16 L27.71,16 L0,32 L-27.71,16 L-27.71,-16 Z" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="3"
+            opacity="0.7"/>
+    </g>
+    <g transform="rotate(60)">
+      <path d="M0,-24 L20.78,-12 L20.78,12 L0,24 L-20.78,12 L-20.78,-12 Z" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="2"
+            opacity="0.5"/>
+    </g>
+    
+    <!-- Central connecting dot -->
+    <circle cx="0" cy="0" r="6" fill="#ffffff"/>
+    
+    <!-- Dynamic connection lines -->
+    <g stroke="#ffffff" stroke-width="2" opacity="0.6">
+      <line x1="0" y1="-6" x2="0" y2="-40"/>
+      <line x1="5.2" y1="3" x2="34.64" y2="20"/>
+      <line x1="-5.2" y1="3" x2="-34.64" y2="20"/>
+    </g>
+  </g>
+  
+  <!-- Glossy overlay -->
+  <rect width="128" height="64" fill="url(#glass)" rx="16"/>
+</svg>

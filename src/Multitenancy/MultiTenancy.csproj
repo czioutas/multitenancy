@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12.0</LangVersion>
+    
+    <!-- Package Information -->
+    <PackageId>Czioutas.Multitenancy</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Chris Zioutas</Authors>
+    <Description>A library to easily add multi-tenancy support for .NET APIs, providing tenant isolation and management capabilities.</Description>
+    
+    <!-- Package Tags and Project URL -->
+    <PackageTags>multitenancy;tenants;aspnetcore;dotnet;entity-framework</PackageTags>
+    <PackageProjectUrl>https://github.com/czioutas/multitenancy</PackageProjectUrl>
+    
+    <!-- License Information -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    
+    <!-- Repository Information -->
+    <RepositoryUrl>https://github.com/yourusername/multitenancy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    
+    <!-- README and Documentation -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    
+    <!-- Source Link Support -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Package Icon -->
+    <PackageIcon>icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../public/icon.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.6.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+  </ItemGroup>
+</Project>
