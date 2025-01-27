@@ -267,4 +267,4 @@ grafana-provisioning
 out/
 
 bin
-obj
+obj.DS_Store
