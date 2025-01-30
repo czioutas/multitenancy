@@ -84,4 +84,160 @@ public class TenantController : ControllerBase
             });
         }
     }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(TenantModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<TenantModel>> Update(Guid id, [FromBody] string newIdentifier)
+    {
+        var tenantId = _config.GetCurrentUserTenantId();
+        var userId = _config.GetCurrentUserId();
+
+        _logger.LogDebug("Update tenant request received. TenantId: {TenantId}, UserId: {UserId}, NewIdentifier: {NewIdentifier}",
+            tenantId, userId, newIdentifier);
+
+        if (id != tenantId)
+        {
+            _logger.LogWarning("Unauthorized attempt to update tenant. RequestedTenantId: {RequestedTenantId}, UserTenantId: {UserTenantId}",
+                id, tenantId);
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Tenant Not Found",
+                Detail = "Tenant with Id '{id}' was not found."
+            });
+        }
+
+        try
+        {
+            _logger.LogInformation("Updating tenant {TenantId} with new identifier: {NewIdentifier}", id, newIdentifier);
+            var result = await _tenantService.UpdateAsync(id, newIdentifier);
+
+            _logger.LogDebug("Successfully updated tenant {TenantId}", id);
+            return Ok(result);
+        }
+        catch (TenantNotFoundException ex)
+        {
+            _logger.LogError(ex, "Tenant not found for update. TenantId: {TenantId}", id);
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Tenant Not Found",
+                Detail = ex.Message
+            });
+        }
+        catch (TenantAlreadyExistsException ex)
+        {
+            _logger.LogError(ex, "New identifier already exists. TenantId: {TenantId}, NewIdentifier: {NewIdentifier}",
+                id, newIdentifier);
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Identifier Already Exists",
+                Detail = ex.Message
+            });
+        }
+        catch (TenantException ex)
+        {
+            _logger.LogError(ex, "Tenant error occurred during update. TenantId: {TenantId}, Error: {ErrorMessage}",
+                id, ex.Message);
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Tenant Error",
+                Detail = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error occurred while updating tenant. TenantId: {TenantId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Server Error",
+                Detail = "An unexpected error occurred"
+            });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var tenantId = _config.GetCurrentUserTenantId();
+        var userId = _config.GetCurrentUserId();
+
+        _logger.LogDebug("Delete tenant request received. TenantId: {TenantId}, UserId: {UserId}", tenantId, userId);
+
+        if (id != tenantId)
+        {
+            _logger.LogWarning("Unauthorized attempt to update tenant. RequestedTenantId: {RequestedTenantId}, UserTenantId: {UserTenantId}",
+                id, tenantId);
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Tenant Not Found",
+                Detail = "Tenant with Id '{id}' was not found."
+            });
+        }
+
+        try
+        {
+            _logger.LogInformation("Deleting tenant {TenantId}", id);
+            var result = await _tenantService.DeleteAsync(id);
+
+            if (result)
+            {
+                _logger.LogDebug("Successfully deleted tenant {TenantId}", id);
+                return NoContent();
+            }
+            else
+            {
+                _logger.LogError("Failed to delete tenant {TenantId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "Server Error",
+                    Detail = "Failed to delete tenant"
+                });
+            }
+        }
+        catch (TenantNotFoundException ex)
+        {
+            _logger.LogError(ex, "Tenant not found for deletion. TenantId: {TenantId}", id);
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Tenant Not Found",
+                Detail = ex.Message
+            });
+        }
+        catch (TenantException ex)
+        {
+            _logger.LogError(ex, "Tenant error occurred during deletion. TenantId: {TenantId}, Error: {ErrorMessage}",
+                id, ex.Message);
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Tenant Error",
+                Detail = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error occurred while deleting tenant. TenantId: {TenantId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Server Error",
+                Detail = "An unexpected error occurred"
+            });
+        }
+    }
 }
