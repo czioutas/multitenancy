@@ -10,6 +10,7 @@ public class TenantEntity
     public string Identifier { get; set; } // the identifier can change but not the Id
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
+    public bool Deleted { get; set; } = false;
 
     public TenantEntity()
     {

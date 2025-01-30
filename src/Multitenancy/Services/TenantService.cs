@@ -14,6 +14,8 @@ public interface ITenantService
     Task<TenantModel> GetAsync(Guid tenantId);
     Task<TenantModel> GetAsync(string tenantIdentifier);
     string GetRandomIdentifier();
+    Task<TenantModel> UpdateAsync(Guid tenantId, string newIdentifier);
+    Task<bool> DeleteAsync(Guid tenantId);
 }
 
 public class TenantService : ITenantService
@@ -79,7 +81,7 @@ public class TenantService : ITenantService
     {
         try
         {
-            var tenantEntity = await Tenants.FirstOrDefaultAsync(t => t.Identifier == tenantIdentifier);
+            var tenantEntity = await Tenants.FirstOrDefaultAsync(t => t.Identifier == tenantIdentifier && !t.Deleted);
 
             if (tenantEntity is null)
             {
@@ -105,7 +107,7 @@ public class TenantService : ITenantService
         try
         {
             TenantEntity? tenantEntity = await Tenants
-            .Where(t => t.Id == tenantId)
+            .Where(t => t.Id == tenantId && !t.Deleted)
             .FirstOrDefaultAsync();
 
             if (tenantEntity is null)
@@ -132,8 +134,7 @@ public class TenantService : ITenantService
         try
         {
             TenantEntity? tenantEntity = await Tenants
-            .Where(t => t.Identifier == tenantIdentifier)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(t => t.Identifier == tenantIdentifier && !t.Deleted);
 
             if (tenantEntity is null)
             {
@@ -151,6 +152,82 @@ public class TenantService : ITenantService
         catch (Exception ex) when (ex is not TenantException)
         {
             throw new TenantOperationException($"Failed to get tenant with Identifier '{tenantIdentifier}'", ex);
+        }
+    }
+
+    public async Task<TenantModel> UpdateAsync(Guid tenantId, string newIdentifier)
+    {
+        try
+        {
+            // Check if tenant exists
+            var existingTenant = await Tenants
+                .Where(t => t.Id == tenantId && !t.Deleted)
+                .FirstOrDefaultAsync();
+
+            if (existingTenant == null)
+            {
+                throw new TenantNotFoundException(tenantId);
+            }
+
+            // Check if new identifier is already in use by another tenant
+            var identifierExists = await Tenants
+                .Where(t => t.Identifier == newIdentifier && t.Id != tenantId && !t.Deleted)
+                .AnyAsync();
+
+            if (identifierExists)
+            {
+                throw new TenantAlreadyExistsException(newIdentifier);
+            }
+
+            // Update tenant
+            existingTenant.Identifier = newIdentifier;
+
+            var result = await _dbContext.SaveChangesAsync();
+
+            if (result != 1)
+            {
+                throw new TenantOperationException($"Failed to update tenant '{tenantId}'");
+            }
+
+            return new TenantModel()
+            {
+                Id = existingTenant.Id,
+                Identifier = existingTenant.Identifier,
+                CreatedAt = existingTenant.CreatedAt,
+                UpdatedAt = existingTenant.UpdatedAt,
+                Deleted = existingTenant.Deleted
+            };
+        }
+        catch (Exception ex) when (ex is not TenantException)
+        {
+            throw new TenantOperationException($"Failed to update tenant '{tenantId}'", ex);
+        }
+    }
+
+    public async Task<bool> DeleteAsync(Guid tenantId)
+    {
+        try
+        {
+            var tenant = await Tenants
+                .Where(t => t.Id == tenantId && !t.Deleted)
+                .FirstOrDefaultAsync();
+
+            if (tenant == null)
+            {
+                throw new TenantNotFoundException(tenantId);
+            }
+
+            // Soft delete
+            tenant.Deleted = true;
+            tenant.UpdatedAt = DateTimeOffset.UtcNow;
+
+            var result = await _dbContext.SaveChangesAsync();
+
+            return result > 0;
+        }
+        catch (Exception ex) when (ex is not TenantException)
+        {
+            throw new TenantOperationException($"Failed to delete tenant '{tenantId}'", ex);
         }
     }
 

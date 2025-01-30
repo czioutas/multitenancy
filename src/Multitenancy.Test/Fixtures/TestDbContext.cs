@@ -10,13 +10,13 @@ public class TestDbContext : TenantIdentityDbContext<IdentityUser<Guid>, Identit
 {
     public TestDbContext(
         DbContextOptions<TestDbContext> options,
-        IRequestTenant requestTenant)
-        : base(options, requestTenant)
+        IRequestTenant requestTenant,
+        TimeProvider timeProvider)
+        : base(options, requestTenant, timeProvider)
     {
     }
 
     public virtual DbSet<DemoResourceEntity> DemoResources => Set<DemoResourceEntity>();
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

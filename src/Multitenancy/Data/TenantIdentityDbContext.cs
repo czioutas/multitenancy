@@ -15,10 +15,12 @@ public abstract class TenantIdentityDbContext<TUser, TRole, TKey> :
    where TKey : IEquatable<TKey>
 {
     protected readonly IRequestTenant _requestTenant;
+    private readonly TimeProvider _timeProvider;
 
-    protected TenantIdentityDbContext(DbContextOptions options, IRequestTenant requestTenant) : base(options)
+    protected TenantIdentityDbContext(DbContextOptions options, IRequestTenant requestTenant, TimeProvider timeProvider) : base(options)
     {
         _requestTenant = requestTenant ?? throw new ArgumentNullException(nameof(requestTenant));
+        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -67,15 +69,24 @@ public abstract class TenantIdentityDbContext<TUser, TRole, TKey> :
     {
         foreach (var entry in ChangeTracker.Entries<TenantAwareEntity>())
         {
-            switch (entry.State)
+            if (entry.State is EntityState.Added or EntityState.Modified)
             {
-                case EntityState.Added:
-                    entry.Entity.TenantId = entry.Entity.TenantId != Guid.Empty ? entry.Entity.TenantId : _requestTenant.TenantId;
-                    break;
+                entry.Entity.TenantId = entry.Entity.TenantId != Guid.Empty
+                    ? entry.Entity.TenantId
+                    : _requestTenant.TenantId;
+            }
+        }
 
-                case EntityState.Modified:
-                    entry.Entity.TenantId = entry.Entity.TenantId != Guid.Empty ? entry.Entity.TenantId : _requestTenant.TenantId;
-                    break;
+        foreach (var entry in ChangeTracker.Entries<TenantEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = _timeProvider.GetUtcNow();
+                entry.Entity.UpdatedAt = null;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = _timeProvider.GetUtcNow();
             }
         }
     }
