@@ -8,6 +8,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Multitenancy.Controllers;
 
+/// <summary>
+/// Controller for managing multi-tenant operations and configurations.
+/// Provides endpoints for retrieving, updating, and deleting tenant information.
+/// </summary>
+/// <remarks>
+/// All endpoints in this controller require authentication.
+/// Operations are restricted to the tenant associated with the authenticated user.
+/// </remarks>
 [ApiController]
 [Authorize]
 [Route("api/v1/[controller]")]
@@ -18,6 +26,13 @@ public class TenantController : ControllerBase
     private readonly ILogger<TenantController> _logger;
     private readonly ITenantConfiguration _config;
 
+    /// <summary>
+    /// Initializes a new instance of the TenantController.
+    /// </summary>
+    /// <param name="tenantService">Service for managing tenant operations.</param>
+    /// <param name="config">Configuration service for tenant settings.</param>
+    /// <param name="logger">Logger for capturing diagnostic information.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any required dependency is null.</exception>
     public TenantController(
         ITenantService tenantService,
         ITenantConfiguration config,
@@ -30,6 +45,19 @@ public class TenantController : ControllerBase
         _logger.LogDebug("TenantController initialized with services: TenantService, TenantConfiguration");
     }
 
+    /// <summary>
+    /// Retrieves the tenant information for the current authenticated user.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint returns detailed information about the tenant associated with the authenticated user.
+    /// The tenant identification is handled automatically through the authentication context.
+    /// </remarks>
+    /// <returns>The tenant information if found.</returns>
+    /// <response code="200">Returns the tenant information successfully.</response>
+    /// <response code="400">If there's a validation error or invalid tenant operation.</response>
+    /// <response code="401">If the user is not authenticated.</response>
+    /// <response code="404">If the tenant is not found.</response>
+    /// <response code="500">If there's an unexpected server error.</response>
     [HttpGet]
     [ProducesResponseType(typeof(TenantModel), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -85,6 +113,23 @@ public class TenantController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates the identifier of a specific tenant.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint allows updating the identifier of the tenant associated with the authenticated user.
+    /// The operation will only succeed if:
+    /// - The specified tenant ID matches the authenticated user's tenant
+    /// - The new identifier is not already in use by another tenant
+    /// - The tenant exists and is active
+    /// </remarks>
+    /// <param name="id">The unique identifier of the tenant to update.</param>
+    /// <param name="newIdentifier">The new identifier to assign to the tenant.</param>
+    /// <returns>The updated tenant information.</returns>
+    /// <response code="200">Returns the updated tenant information.</response>
+    /// <response code="400">If the new identifier is invalid or already exists.</response>
+    /// <response code="404">If the tenant is not found or the user doesn't have access to it.</response>
+    /// <response code="500">If there's an unexpected server error.</response>
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(TenantModel), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -162,6 +207,24 @@ public class TenantController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes a specific tenant.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint performs a soft delete of the tenant associated with the authenticated user.
+    /// The operation will only succeed if:
+    /// - The specified tenant ID matches the authenticated user's tenant
+    /// - The tenant exists and is not already deleted
+    /// 
+    /// Note: This is a soft delete operation. The tenant record is marked as deleted but not removed from the database.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the tenant to delete.</param>
+    /// <returns>No content on successful deletion.</returns>
+    /// <response code="204">If the tenant was successfully deleted.</response>
+    /// <response code="400">If there's a validation error or invalid tenant operation.</response>
+    /// <response code="401">If the user is not authenticated.</response>
+    /// <response code="404">If the tenant is not found or the user doesn't have access to it.</response>
+    /// <response code="500">If there's an unexpected server error.</response>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
