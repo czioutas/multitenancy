@@ -51,7 +51,6 @@ public class TenantEntity
     /// A null value indicates that the tenant has never been updated since creation.
     /// </remarks>
     public DateTimeOffset? UpdatedAt { get; set; }
-    public bool Deleted { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a flag indicating whether the tenant has been deleted.
