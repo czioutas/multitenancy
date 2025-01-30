@@ -31,6 +31,7 @@ public abstract class TenantIdentityDbContext<TUser, TRole, TKey> :
     /// Gets the request tenant service used for tenant isolation.
     /// </summary>
     protected readonly IRequestTenant _requestTenant;
+    private readonly TimeProvider _timeProvider;
 
     /// <summary>
     /// Gets the time provider used for automatic timestamp updates.
