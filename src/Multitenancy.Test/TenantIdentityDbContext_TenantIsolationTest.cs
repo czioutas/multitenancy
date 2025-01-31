@@ -8,6 +8,7 @@ using Multitenancy.Test.Fixtures;
 namespace Multitenancy.Test;
 
 [TestClass]
+[DoNotParallelize]
 public class TenantIdentityDbContext_TenantIsolationTest : IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
@@ -28,7 +29,7 @@ public class TenantIdentityDbContext_TenantIsolationTest : IDisposable
 
         // Add DbContext with in-memory database and pass the RequestTenant
         services.AddDbContext<TestTenantIdentityDbContext>(options =>
-            options.UseInMemoryDatabase(_dbName));
+            options.UseInMemoryDatabase(_dbName).EnableServiceProviderCaching(false));
 
         // Setup mocks
         var loggerMock = new Mock<ILogger<TenantService>>();
@@ -64,7 +65,12 @@ public class TenantIdentityDbContext_TenantIsolationTest : IDisposable
 
     public void Dispose()
     {
-        _dbContext.Database.EnsureDeleted();
+        _dbContext.Dispose();
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
         _dbContext.Dispose();
     }
 

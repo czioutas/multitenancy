@@ -6,6 +6,7 @@ using Multitenancy.Models;
 namespace Multitenancy.Test;
 
 [TestClass]
+[DoNotParallelize]
 public class TenantControllerTests
 {
     private HttpClient _client;

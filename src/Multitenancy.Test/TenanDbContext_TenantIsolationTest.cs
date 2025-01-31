@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -8,13 +10,14 @@ using Multitenancy.Test.Fixtures;
 namespace Multitenancy.Test;
 
 [TestClass]
+[DoNotParallelize]
 public class TenanDbContext_TenantIsolationTest : IDisposable
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TestTenantDbContext _dbContext;
-    private readonly ITenantService _tenantService;
-    private readonly IRequestTenant _requestTenant;
-    private readonly string _dbName;
+    private IServiceProvider _serviceProvider;
+    private TestTenantDbContext _dbContext;
+    private ITenantService _tenantService;
+    private IRequestTenant _requestTenant;
+    private string _dbName;
 
     public TenanDbContext_TenantIsolationTest()
     {
@@ -28,7 +31,8 @@ public class TenanDbContext_TenantIsolationTest : IDisposable
 
         // Add DbContext with in-memory database and pass the RequestTenant
         services.AddDbContext<TestTenantDbContext>(options =>
-            options.UseInMemoryDatabase(_dbName));
+            options.UseInMemoryDatabase(_dbName).EnableServiceProviderCaching(false)
+        );
 
         // Setup mocks
         var loggerMock = new Mock<ILogger<TenantService>>();
@@ -62,7 +66,12 @@ public class TenanDbContext_TenantIsolationTest : IDisposable
 
     public void Dispose()
     {
-        _dbContext.Database.EnsureDeleted();
+        _dbContext.Dispose();
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
         _dbContext.Dispose();
     }
 

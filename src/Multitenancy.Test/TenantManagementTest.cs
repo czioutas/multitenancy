@@ -27,7 +27,7 @@ public class TenantManagementTest : IDisposable
 
         // Add DbContext with in-memory database
         services.AddDbContext<TestTenantIdentityDbContext>(options =>
-            options.UseInMemoryDatabase(_dbName));
+            options.UseInMemoryDatabase(_dbName).EnableServiceProviderCaching(false));
 
         // Setup mocks
         var loggerMock = new Mock<ILogger<TenantService>>();
@@ -58,7 +58,12 @@ public class TenantManagementTest : IDisposable
 
     public void Dispose()
     {
-        _dbContext.Database.EnsureDeleted();
+        _dbContext.Dispose();
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
         _dbContext.Dispose();
     }
 
