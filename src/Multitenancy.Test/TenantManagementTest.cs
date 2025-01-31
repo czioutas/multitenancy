@@ -11,7 +11,7 @@ namespace Multitenancy.Test;
 public class TenantManagementTest : IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly TestDbContext _dbContext;
+    private readonly TestTenantIdentityDbContext _dbContext;
     private readonly ITenantService _tenantService;
     private readonly string _dbName;
 
@@ -26,8 +26,8 @@ public class TenantManagementTest : IDisposable
         services.AddSingleton(TimeProvider.System);
 
         // Add DbContext with in-memory database
-        services.AddDbContext<TestDbContext>(options =>
-            options.UseInMemoryDatabase(_dbName));
+        services.AddDbContext<TestTenantIdentityDbContext>(options =>
+            options.UseInMemoryDatabase(_dbName).EnableServiceProviderCaching(false));
 
         // Setup mocks
         var loggerMock = new Mock<ILogger<TenantService>>();
@@ -35,10 +35,10 @@ public class TenantManagementTest : IDisposable
         var requestTenantMock = new Mock<IRequestTenant>();
 
         // Configure tenant services
-        services.AddMultiTenancy<TestDbContext>(options =>
+        services.AddMultiTenancy<TestTenantIdentityDbContext>(options =>
         {
             options
-                .WithDbContext<TestDbContext>()
+                .WithDbContext<TestTenantIdentityDbContext>()
                 .WithUser<Microsoft.AspNetCore.Identity.IdentityUser<Guid>>()
                 .WithRole<Microsoft.AspNetCore.Identity.IdentityRole<Guid>>()
                 .WithCurrentUserProvider(_ => Guid.NewGuid())
@@ -52,13 +52,18 @@ public class TenantManagementTest : IDisposable
         _serviceProvider = services.BuildServiceProvider();
 
         // Get instances
-        _dbContext = _serviceProvider.GetRequiredService<TestDbContext>();
+        _dbContext = _serviceProvider.GetRequiredService<TestTenantIdentityDbContext>();
         _tenantService = _serviceProvider.GetRequiredService<ITenantService>();
     }
 
     public void Dispose()
     {
-        _dbContext.Database.EnsureDeleted();
+        _dbContext.Dispose();
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
         _dbContext.Dispose();
     }
 

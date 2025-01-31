@@ -1,18 +1,17 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Multitenancy.Services;
 using Multitenancy.Test.Fixtures;
-using MultiTenancy.Data;
 
 namespace Multitenancy.Test;
 
-public class TestDbContext : TenantIdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>
+public class TestTenantIdentityDbContextSimple : TenantIdentityDbContext
 {
-    public TestDbContext(
-        DbContextOptions<TestDbContext> options,
+    public TestTenantIdentityDbContextSimple(
+        DbContextOptions<TestTenantIdentityDbContextSimple> options,
         IRequestTenant requestTenant,
-        TimeProvider timeProvider)
-        : base(options, requestTenant, timeProvider)
+        TimeProvider timeProvider,
+        ITenantConfiguration tenantConfiguration)
+        : base(options, requestTenant, timeProvider, tenantConfiguration)
     {
     }
 

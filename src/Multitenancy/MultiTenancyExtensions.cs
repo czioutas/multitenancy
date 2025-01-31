@@ -1,10 +1,11 @@
 using Multitenancy.Services;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Multitenancy.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
 namespace Multitenancy;
 
@@ -30,11 +31,16 @@ public static class MultiTenancyExtensions
         services.AddScoped<IRequestTenant, RequestTenant>();
         services.AddTransient<MultiTenantServiceMiddleware>();
 
-        services.AddMvcCore()
-            .ConfigureApplicationPartManager(manager =>
+        services.AddMvc().ConfigureApplicationPartManager(manager =>
             {
                 manager.ApplicationParts.Add(new AssemblyPart(typeof(MultiTenancyExtensions).Assembly));
             });
+
+        // services.AddControllers()
+        //     .ConfigureApplicationPartManager(manager =>
+        //     {
+        //         manager.ApplicationParts.Add(new AssemblyPart(typeof(MultiTenancyExtensions).Assembly));
+        //     });
 
         return services;
     }
