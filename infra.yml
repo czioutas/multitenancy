@@ -1,0 +1,20 @@
+name: multitenancy
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER=applicationDb
+      - POSTGRES_PASSWORD=applicationDb
+      - POSTGRES_DB=applicationDb
+      #PGDATA: /var/lib/postgresql/data/pg_data
+    volumes:
+      - ~/Downloads/:/downloads/
+    ports:
+      - "5433:5432"
+    networks:
+      - infra
+
+networks:
+  infra:
